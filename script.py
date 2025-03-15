@@ -10,10 +10,9 @@ def load_data(filepath):
   quantitative_data  = x.columns[x.dtypes == "int64"]
 
 
+
 def main():
   filepath = "Thyroid_Diff.csv"
 
-
-  
 if __name__ == "__main__":
   main()
