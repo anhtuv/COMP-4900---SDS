@@ -26,7 +26,6 @@ def lasso_reg(x_train, y_train):
 def chi_square(x_train, y_train, x_test, qualitative_preprocessed):
     x_train_cat = x_train.loc[:, qualitative_preprocessed.columns]
     x_test_cat = x_test.loc[:, qualitative_preprocessed.columns]
-    
     chi2_selector = SelectKBest(chi2, k=5)
     chi2_selector.fit_transform(x_train_cat, y_train)
     chi2_selector.transform(x_test_cat)
