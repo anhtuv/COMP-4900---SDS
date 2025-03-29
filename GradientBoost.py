@@ -1,19 +1,15 @@
 import lightgbm as lgb
 import pandas as pd
-import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn import metrics
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 import matplotlib.pyplot as plt
-
-
 
 data = pd.read_csv("Thyroid_Diff.csv")
 
 x = data.iloc[:, :-1]
 y = data.iloc[:, -1]
 
-# Preprocess data
 quantitative_data  = x.columns[x.dtypes == "int64"]
 scaler = StandardScaler()
 quantitative_preprocessed = pd.DataFrame(scaler.fit_transform(x[quantitative_data]), columns=quantitative_data)
