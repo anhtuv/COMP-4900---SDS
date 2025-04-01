@@ -6,8 +6,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, log_loss, roc_auc_score
 from sklearn.feature_selection import SelectKBest, chi2
 
-def load_data(filepath):
-    data = pd.read_csv(filepath)
+def preprocess_data(data):
     X = data.iloc[:, :-1]
     y = data.iloc[:, -1]
 
@@ -17,7 +16,7 @@ def load_data(filepath):
     scaler = MinMaxScaler()
     X_scaled = scaler.fit_transform(X)
 
-    return X_scaled, y#, X.columns
+    return X_scaled, y
 
 def select_important_features(X, y, feature_names, k=5):
     selector = SelectKBest(chi2, k=k)
@@ -76,7 +75,7 @@ def train_knn_model(X_train, y_train, X_val, y_val, X_test, y_test):
 def main():
     filepath = "Thyroid_Diff.csv"
     # X, y, feature_names = load_data(filepath)
-    X, y = load_data(filepath)
+    X, y = preprocess_data(filepath)
 
     # Select important features
    # X_selected, selected_features = select_important_features(X, y, feature_names, k=5)

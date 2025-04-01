@@ -16,23 +16,15 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import BinaryCrossentropy
 import matplotlib.pyplot as plt
 
-def load_data(filepath):
-  df = pd.read_csv(filepath)
-  
+def preprocess_data(data):
   labelencoder = LabelEncoder()
-  df['Recurred'] = labelencoder.fit_transform(df['Recurred'])
-
-  quantitative_data = df.select_dtypes(include=['int64', 'float64']).drop('Recurred', axis=1)
-  qualitative_data = df.select_dtypes(include=['object'])
-
-  scaler = StandardScaler()
-  quantitative_preprocessed = scaler.fit_transform(quantitative_data)
-
+  data['Recurred'] = labelencoder.fit_transform(data['Recurred'])
   encoder = OneHotEncoder(sparse_output=False)
-  qualitative_preprocessed = encoder.fit_transform(qualitative_data)
+  
+  qualitative_preprocessed = encoder.fit_transform(data)
 
-  X = np.hstack((quantitative_preprocessed, qualitative_preprocessed))
-  y = df['Recurred']
+  X = np.hstack((qualitative_preprocessed))
+  y = data['Recurred']
   
   return X, y
 
@@ -96,7 +88,7 @@ def train_model(X_train, y_train, X_val, y_val, X_test, y_test):
 
 def main():
   filepath = "Thyroid_Diff.csv"
-  X, y = load_data(filepath)
+  X, y = preprocess_data(filepath)
   X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.30, random_state=42)
   X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.33, random_state=42)
   train_model(X_train, y_train, X_val, y_val, X_test, y_test)

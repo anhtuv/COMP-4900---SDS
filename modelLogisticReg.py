@@ -6,8 +6,7 @@ from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, roc_auc_
 from sklearn.linear_model import LogisticRegression
 from sklearn.feature_selection import SelectKBest, mutual_info_classif
 
-def load_data(filepath):
-    data = pd.read_csv(filepath)
+def preprocess_data(data):
     X = data.iloc[:, :-1]
     y = data.iloc[:, -1]
 
@@ -17,7 +16,7 @@ def load_data(filepath):
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
 
-    return X_scaled, y#, X.columns
+    return X_scaled, y
 
 def select_important_features(X, y, feature_names, k=5):
     selector = SelectKBest(score_func=mutual_info_classif, k=k)
@@ -75,7 +74,7 @@ def train_logistic_regression_model(X_train, y_train, X_val, y_val, X_test, y_te
 def main():
     filepath = "Thyroid_Diff.csv"
     # X, y, feature_names = load_data(filepath)
-    X, y = load_data(filepath)
+    X, y = preprocess_data(filepath)
 
     # Select important features
     # X_selected, selected_features = select_important_features(X, y, feature_names, k=5)

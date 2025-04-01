@@ -5,26 +5,18 @@ from sklearn import metrics
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 import matplotlib.pyplot as plt
 
-def load_data(filepath):
-    data = pd.read_csv(filepath)
-    
+def preprocess_data(data):    
     x = data.iloc[:, :-1]
     y = data.iloc[:, -1]
 
-    # Preprocess quantitative data (scaling)
-    quantitative_data  = x.columns[x.dtypes == "int64"]
-    scaler = StandardScaler()
-    quantitative_preprocessed = pd.DataFrame(scaler.fit_transform(x[quantitative_data]), columns=quantitative_data)
-
     # Preprocess qualitative data (one-hot encoding)
-    qualitative_data = x.columns[x.dtypes == "object"].values
     encoder = OneHotEncoder(sparse_output=False)
     qualitative_preprocessed = pd.DataFrame(
-        encoder.fit_transform(x[qualitative_data]), 
-        columns=encoder.get_feature_names_out(qualitative_data)
+        encoder.fit_transform(x), 
+        columns=encoder.get_feature_names_out(x)
     )
 
-    x_preprocessed = pd.concat([quantitative_preprocessed, qualitative_preprocessed], axis=1)
+    x_preprocessed = pd.concat([qualitative_preprocessed], axis=1)
 
     # Map target variable ("Yes" and "No" to 1 and 0)
     y = y.map({"No": 0, "Yes": 1})
@@ -80,7 +72,7 @@ def train_model(x_train, y_train, x_val, y_val, x_test, y_test):
 
 def main():
     filepath = "Thyroid_Diff.csv"
-    x, y = load_data(filepath)
+    x, y = preprocess_data(filepath)
     x_train, x_temp, y_train, y_temp = train_test_split(x, y, test_size=0.30, random_state=42)
     x_val, x_test, y_val, y_test = train_test_split(x_temp, y_temp, test_size=0.33, random_state=42)
     train_model(x_train, y_train, x_val, y_val, x_test, y_test)

@@ -7,14 +7,13 @@ from xgboost import XGBClassifier
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-def load_data(filepath):
-    data = pd.read_csv(filepath)
+def preprocess_data(data):
     X = data.iloc[:, :-1]
     y = data.iloc[:, -1].map({'Yes': 1, 'No': 0})
     X = pd.get_dummies(X) 
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
-    return X_scaled, y#, X.columns
+    return X_scaled, y
 
 def train_model(X_train, y_train, X_val, y_val, X_test, y_test):#, feature_names):
     model = XGBClassifier(
@@ -81,7 +80,7 @@ def train_model(X_train, y_train, X_val, y_val, X_test, y_test):#, feature_names
 
 def main():
     filepath = "Thyroid_Diff.csv"
-    X, y = load_data(filepath)
+    X, y = preprocess_data(filepath)
 
     X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.30, random_state=42)
     X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.33, random_state=42)

@@ -6,8 +6,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import confusion_matrix, roc_auc_score, accuracy_score, f1_score, log_loss
 import matplotlib.pyplot as plt
 
-def load_data(filepath):
-    data = pd.read_csv(filepath)
+def preprocess_data(data):
     X = data.iloc[:, :-1]
     y = data.iloc[:, -1]
 
@@ -78,7 +77,7 @@ def train_random_forest_model(X_train, y_train, X_val, y_val, X_test, y_test):
 
 def main():
     filepath = "Thyroid_Diff.csv"
-    X, y = load_data(filepath)
+    X, y = preprocess_data(filepath)
     X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.30, random_state=42)
     X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.33, random_state=42)
     train_random_forest_model(X_train, y_train, X_val, y_val, X_test, y_test)

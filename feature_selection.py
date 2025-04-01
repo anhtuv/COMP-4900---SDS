@@ -22,14 +22,11 @@ def lasso_reg(x_train, y_train):
     return {feature: float(coef) for feature, coef in zip(x_train.columns, importance)}
 # higher scores == most important
 
-def chi_square(x_train, y_train, x_test, qualitative_preprocessed):
-    x_train_cat = x_train.loc[:, qualitative_preprocessed.columns]
-    x_test_cat = x_test.loc[:, qualitative_preprocessed.columns]
+def chi_square(x_train, y_train):
     chi2_selector = SelectKBest(chi2, k='all')
-    chi2_selector.fit(x_train_cat, y_train)
-    chi2_selector.transform(x_test_cat)
+    chi2_selector.fit(x_train, y_train)
     scores = chi2_selector.scores_
-    return {feature: float(score) for feature, score in zip(x_train_cat.columns, scores)}
+    return {feature: float(score) for feature, score in zip(x_train.columns, scores)}
 # higher scores == most important
 
 def rec_feat_elim(x_train, y_train):
