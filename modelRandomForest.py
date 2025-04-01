@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import confusion_matrix, roc_auc_score, accuracy_score, f1_score
+from sklearn.metrics import confusion_matrix, roc_auc_score, accuracy_score, f1_score, log_loss
 from sklearn.feature_selection import SelectKBest, chi2
 from imblearn.over_sampling import SMOTE
 import matplotlib.pyplot as plt
@@ -35,22 +35,31 @@ def train_random_forest_model(X, y):
 
     # Train Random Forest model
     rf_model = RandomForestClassifier(n_estimators=100, random_state=42, class_weight='balanced')
-    rf_model.fit(X_train, y_train) #bal
+    rf_model.fit(X_train, y_train)  #bal
 
     # Predictions
-    y_train_pred = rf_model.predict(X_train) #bal
+    y_train_pred = rf_model.predict(X_train)  #bal
     y_val_pred = rf_model.predict(X_val)
     y_test_pred = rf_model.predict(X_test)
 
     # Accuracy scores
-    train_acc = accuracy_score(y_train, y_train_pred) #bal
+    train_acc = accuracy_score(y_train, y_train_pred)  #bal
     val_acc = accuracy_score(y_val, y_val_pred)
     test_acc = accuracy_score(y_test, y_test_pred)
 
     # F1 Scores
-    train_f1 = f1_score(y_train, y_train_pred) #bal
+    train_f1 = f1_score(y_train, y_train_pred)  #bal
     val_f1 = f1_score(y_val, y_val_pred)
     test_f1 = f1_score(y_test, y_test_pred)
+
+    # Log Loss (Loss function for training, validation, and test)
+    y_train_prob = rf_model.predict_proba(X_train)[:, 1]  # Probabilities for training set
+    y_val_prob = rf_model.predict_proba(X_val)[:, 1]  # Probabilities for validation set
+    y_test_prob = rf_model.predict_proba(X_test)[:, 1]  # Probabilities for test set
+
+    train_loss = log_loss(y_train, y_train_prob)
+    val_loss = log_loss(y_val, y_val_prob)
+    test_loss = log_loss(y_test, y_test_prob)
 
     # Confusion Matrix
     cm = confusion_matrix(y_test, y_test_pred)
@@ -58,14 +67,12 @@ def train_random_forest_model(X, y):
     # AUC Score
     auc = roc_auc_score(y_test, rf_model.predict_proba(X_test)[:, 1])
 
-    print(f"Train Accuracy: {train_acc:.4f}, Train F1: {train_f1:.4f}")
-    print(f"Validation Accuracy: {val_acc:.4f}, Validation F1: {val_f1:.4f}")
-    print(f"Test Accuracy: {test_acc:.4f}, Test F1: {test_f1:.4f}")
+    # Print results
+    print(f"Train Accuracy: {train_acc:.4f}, Train F1: {train_f1:.4f}, Train Loss: {train_loss:.4f}")
+    print(f"Validation Accuracy: {val_acc:.4f}, Validation F1: {val_f1:.4f}, Validation Loss: {val_loss:.4f}")
+    print(f"Test Accuracy: {test_acc:.4f}, Test F1: {test_f1:.4f}, Test Loss: {test_loss:.4f}")
     print("Confusion Matrix:\n", cm)
     print("AUC Score:", auc)
-
-
-
 
     # Feature importance
     feature_importance = pd.DataFrame({'Feature': pd.get_dummies(pd.read_csv("Thyroid_Diff.csv").iloc[:, :-1]).columns,'Importance': rf_model.feature_importances_})

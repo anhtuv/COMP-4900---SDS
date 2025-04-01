@@ -135,10 +135,10 @@ def train_svm_model(X, y):
 
 
 
-  # Apply Chi-square test
-  chi2_selector = SelectKBest(chi2, k=5)  # Select top 5 features
-  selected_features = feature_names[chi2_selector.get_support()]
-  print("Top Features by Chi-Square Test:", selected_features)
+  # # Apply Chi-square test
+  # chi2_selector = SelectKBest(chi2, k=5)  # Select top 5 features
+  # selected_features = feature_names[chi2_selector.get_support()]
+  # print("Top Features by Chi-Square Test:", selected_features)
 
 
   # Print results
@@ -157,7 +157,6 @@ def main():
   filepath = "Thyroid_Diff.csv"
   X, y = load_data(filepath)
   model = train_svm_model(X, y)
-  print(model)
 
 
 if __name__ == "__main__":
