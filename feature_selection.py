@@ -40,10 +40,7 @@ def rec_feat_elim(x_train, y_train):
     x_train_rfe = rfe.fit_transform(x_train, y_train)
     model.fit(x_train_rfe, y_train)
     recursive_feat_elim_features = {feature: int(rank) for feature, rank in zip(x_train.columns, rfe.ranking_)}
-    print(recursive_feat_elim_features)
     sorted_feature_names = [feature[0] for feature in sorted(recursive_feat_elim_features.items(), key=lambda item: item[1], reverse=False)]
-    print(sorted_feature_names)
-    quit()
     return sorted_feature_names
 # 1 == most important
         
