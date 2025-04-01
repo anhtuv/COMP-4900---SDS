@@ -8,12 +8,13 @@ import matplotlib.pyplot as plt
 def preprocess_data(data):    
     x = data.iloc[:, :-1]
     y = data.iloc[:, -1]
-
+    
     # Preprocess qualitative data (one-hot encoding)
+    qualitative_data = x.columns[x.dtypes == "object"].values
     encoder = OneHotEncoder(sparse_output=False)
     qualitative_preprocessed = pd.DataFrame(
-        encoder.fit_transform(x), 
-        columns=encoder.get_feature_names_out(x)
+        encoder.fit_transform(x[qualitative_data]), 
+        columns=encoder.get_feature_names_out(qualitative_data)
     )
 
     x_preprocessed = pd.concat([qualitative_preprocessed], axis=1)
