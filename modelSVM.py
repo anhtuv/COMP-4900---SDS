@@ -3,108 +3,116 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 from sklearn.metrics import confusion_matrix, roc_auc_score, accuracy_score, f1_score, hinge_loss
 from imblearn.over_sampling import SMOTE
 from sklearn.feature_selection import SelectKBest, chi2, RFE
 from sklearn.inspection import permutation_importance
 
-def preprocess_data(data):
-  X = data.iloc[:, :-1]
-  y = data.iloc[:, -1]
+def preprocess_data(data):    
+    x = data.iloc[:, :-1]
+    y = data.iloc[:, -1]
+    
+    # Preprocess qualitative data (one-hot encoding)
+    qualitative_data = x.columns[x.dtypes == "object"].values
+    encoder = OneHotEncoder(sparse_output=False)
+    qualitative_preprocessed = pd.DataFrame(
+        encoder.fit_transform(x[qualitative_data]), 
+        columns=encoder.get_feature_names_out(qualitative_data)
+    )
 
-  y = y.map({'Yes': 1, 'No': 0})
+    x_preprocessed = pd.concat([qualitative_preprocessed], axis=1)
 
-  X = pd.get_dummies(X)
-
-  # Scale data using MinMaxScaler (scales between 0 and 1)
-  scaler = MinMaxScaler()
-  X_scaled = scaler.fit_transform(X)
-
-  return X_scaled, y
+    # Map target variable ("Yes" and "No" to 1 and 0)
+    y = y.map({"No": 0, "Yes": 1})
+    
+    return x_preprocessed, y
 
 def train_model(X_train, y_train, X_val, y_val, X_test, y_test):
-  model = SVC(kernel='rbf', C=1, gamma='scale', class_weight='balanced', probability=True)
-  model.fit(X_train, y_train)
+    model = SVC(kernel='rbf', C=1, gamma='scale', class_weight='balanced', probability=True)
+    model.fit(X_train, y_train)
 
-  # Predictions and probabilities
-  y_train_pred = model.predict(X_train)
-  y_val_pred = model.predict(X_val)
-  y_test_pred = model.predict(X_test)
+    # Predictions and probabilities
+    y_train_pred = model.predict(X_train)
+    y_val_pred = model.predict(X_val)
+    y_test_pred = model.predict(X_test)
 
-  y_test_proba = model.predict_proba(X_test)[:, 1]
+    y_test_proba = model.predict_proba(X_test)[:, 1]
 
-  # Accuracy scores
-  train_acc = accuracy_score(y_train, y_train_pred)
-  val_acc = accuracy_score(y_val, y_val_pred)
-  test_acc = accuracy_score(y_test, y_test_pred)
+    # Accuracy scores
+    train_acc = accuracy_score(y_train, y_train_pred)
+    val_acc = accuracy_score(y_val, y_val_pred)
+    test_acc = accuracy_score(y_test, y_test_pred)
 
-  # F1 Scores
-  train_f1 = f1_score(y_train, y_train_pred)
-  val_f1 = f1_score(y_val, y_val_pred)
-  test_f1 = f1_score(y_test, y_test_pred)
+    # F1 Scores
+    train_f1 = f1_score(y_train, y_train_pred)
+    val_f1 = f1_score(y_val, y_val_pred)
+    test_f1 = f1_score(y_test, y_test_pred)
 
-  # Hinge loss
-  y_train_hinge = np.where(y_train == 1, 1, -1)
-  y_val_hinge = np.where(y_val == 1, 1, -1)
-  y_test_hinge = np.where(y_test == 1, 1, -1)
+    # Hinge loss
+    y_train_hinge = np.where(y_train == 1, 1, -1)
+    y_val_hinge = np.where(y_val == 1, 1, -1)
+    y_test_hinge = np.where(y_test == 1, 1, -1)
 
-  # Predict decision function for hinge loss calculation
-  train_decision = model.decision_function(X_train)
-  val_decision = model.decision_function(X_val)
-  test_decision = model.decision_function(X_test)
+    # Predict decision function for hinge loss calculation
+    train_decision = model.decision_function(X_train)
+    val_decision = model.decision_function(X_val)
+    test_decision = model.decision_function(X_test)
 
-  train_loss = hinge_loss(y_train_hinge, train_decision)
-  val_loss = hinge_loss(y_val_hinge, val_decision)
-  test_loss = hinge_loss(y_test_hinge, test_decision)
+    train_loss = hinge_loss(y_train_hinge, train_decision)
+    val_loss = hinge_loss(y_val_hinge, val_decision)
+    test_loss = hinge_loss(y_test_hinge, test_decision)
 
-  # Train an SVM with a linear kernel for feature selection
-  svm_linear = SVC(kernel="linear", C=1, class_weight="balanced")
+    # Train an SVM with a linear kernel for feature selection
+    # svm_linear = SVC(kernel="linear", C=1, class_weight="balanced")
 
-  # Use RFE to select top features
-  selector = RFE(svm_linear, n_features_to_select=5)
-  selector.fit(X_train, y_train)
-  feature_names = pd.get_dummies(pd.read_csv("Thyroid_Diff.csv").iloc[:, :-1]).columns
-  selected_features = feature_names[selector.support_]
+    # Use RFE to select top features
+    # selector = RFE(svm_linear, n_features_to_select=5)
+    # selector.fit(X_train, y_train)
 
-  #print("Selected Features:", selected_features)
+    # # Get the feature names after preprocessing (ensure it's consistent with the feature set)
+    # feature_names = X_train.columns if hasattr(X_train, 'columns') else np.arange(X_train.shape[1])
 
-  # Feature importance using permutation importance
-  result = permutation_importance(model, X_train, y_train, scoring="accuracy", n_repeats=10, random_state=42)
-  importance_scores = result.importances_mean
+    # # Ensure that the feature_names are aligned with the selected features
+    # selected_features = feature_names[selector.support_]
 
-  # Convert to DataFrame for visualization
-  importance_df = pd.DataFrame({"Feature": feature_names, "Importance": importance_scores})
-  importance_df = importance_df.sort_values(by="Importance", ascending=False)
+    # # Feature importance using permutation importance
+    # result = permutation_importance(model, X_train, y_train, scoring="accuracy", n_repeats=10, random_state=42)
+    # importance_scores = result.importances_mean
 
-  # Plot the top features
-  plt.figure(figsize=(12, 8))  # Increase figure size for better visibility
-  plt.barh(importance_df["Feature"][:10], importance_df["Importance"][:10])  # Top 10 features
-  plt.xlabel("Importance Score")
-  plt.ylabel("Feature")
-  plt.title("Feature Importance (Permutation Method)")
+    # # Convert to DataFrame for visualization
+    # importance_df = pd.DataFrame({"Feature": selected_features, "Importance": importance_scores})
+    # importance_df = importance_df.sort_values(by="Importance", ascending=False)
 
-  # Rotate feature names for better readability
-  plt.xticks(rotation=45, ha="right")
+    # # Plot the top features
+    # plt.figure(figsize=(12, 8))  # Increase figure size for better visibility
+    # plt.barh(importance_df["Feature"][:10], importance_df["Importance"][:10])  # Top 10 features
+    # plt.xlabel("Importance Score")
+    # plt.ylabel("Feature")
+    # plt.title("Feature Importance (Permutation Method)")
 
-  # Invert y-axis to show the most important feature at the top
-  plt.gca().invert_yaxis()
+    # # Rotate feature names for better readability
+    # plt.xticks(rotation=45, ha="right")
 
-  # Adjust layout to prevent label overlap
-  plt.tight_layout()
+    # # Invert y-axis to show the most important feature at the top
+    # plt.gca().invert_yaxis()
 
-  #plt.show()
+    # # Adjust layout to prevent label overlap
+    # plt.tight_layout()
+    #plt.show
+    # Print results
+    print("svm model")
+    print(f"Train Accuracy: {train_acc:.4f}, Train F1: {train_f1:.4f}, Train Loss: {train_loss:.4f}")
+    print(f"Validation Accuracy: {val_acc:.4f}, Validation F1: {val_f1:.4f}, Validation Loss: {val_loss:.4f}")
+    print(f"Test Accuracy: {test_acc:.4f}, Test F1: {test_f1:.4f}, Test Loss: {test_loss:.4f}")
 
-  # Print results
-  print(f"Train Accuracy: {train_acc:.4f}, Train F1: {train_f1:.4f}, Train Loss: {train_loss:.4f}")
-  print(f"Validation Accuracy: {val_acc:.4f}, Validation F1: {val_f1:.4f}, Validation Loss: {val_loss:.4f}")
-  print(f"Test Accuracy: {test_acc:.4f}, Test F1: {test_f1:.4f}, Test Loss: {test_loss:.4f}")
+    cm = confusion_matrix(y_test, y_test_pred)
+    print("Confusion Matrix:\n", cm)
 
-  cm = confusion_matrix(y_test, y_test_pred)
-  print("Confusion Matrix:\n", cm)
+    auc = roc_auc_score(y_test, y_test_proba)
+    print("AUC Score:", auc)
+    return test_acc
 
-  auc = roc_auc_score(y_test, y_test_proba)
-  print("AUC Score:", auc)
 
 def main():
   filepath = "Thyroid_Diff.csv"

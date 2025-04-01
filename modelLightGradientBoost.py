@@ -25,7 +25,7 @@ def preprocess_data(data):
     return x_preprocessed, y
 
 def train_model(x_train, y_train, x_val, y_val, x_test, y_test):
-    model = lgb.LGBMClassifier(learning_rate=0.09, max_depth=-5, random_state=42)
+    model = lgb.LGBMClassifier(learning_rate=0.01, max_depth=-5, random_state=42)
     model.fit(x_train, y_train, eval_set=[(x_val, y_val), (x_train, y_train)], eval_metric='logloss')
 
     # Predictions
@@ -58,6 +58,7 @@ def train_model(x_train, y_train, x_val, y_val, x_test, y_test):
     auc = metrics.roc_auc_score(y_test, model.predict_proba(x_test)[:, 1])
 
     # Print the evaluation metrics in the requested format
+    print("light gradient boost model")
     print(f"Train Accuracy: {train_acc:.4f}, Train F1: {train_f1:.4f}, Train Loss: {train_loss:.4f}")
     print(f"Validation Accuracy: {val_acc:.4f}, Validation F1: {val_f1:.4f}, Validation Loss: {val_loss:.4f}")
     print(f"Test Accuracy: {test_acc:.4f}, Test F1: {test_f1:.4f}, Test Loss: {test_loss:.4f}")
@@ -70,6 +71,7 @@ def train_model(x_train, y_train, x_val, y_val, x_test, y_test):
     plt.savefig('importance.png')
     lgb.plot_metric(model)
     plt.savefig('metric.png')
+    return test_acc
 
 def main():
     filepath = "Thyroid_Diff.csv"
