@@ -20,11 +20,9 @@ def load_data(filepath):
     return X_scaled, y, X.columns
 
 def train_logistic_regression_model(X, y):
-    # Use the same 70-20-10 split
     X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.30, random_state=42)
     X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.33, random_state=42)
 
-    # Train Logistic Regression Model
     log_reg = LogisticRegression(max_iter=500, solver='lbfgs', class_weight='balanced', random_state=42)
     log_reg.fit(X_train, y_train)
 
@@ -44,9 +42,9 @@ def train_logistic_regression_model(X, y):
     test_f1 = f1_score(y_test, y_test_pred)
 
     # Log Loss (Loss function for training, validation, and test)
-    y_train_prob = log_reg.predict_proba(X_train)[:, 1]  # Probabilities for training set
-    y_val_prob = log_reg.predict_proba(X_val)[:, 1]  # Probabilities for validation set
-    y_test_prob = log_reg.predict_proba(X_test)[:, 1]  # Probabilities for test set
+    y_train_prob = log_reg.predict_proba(X_train)[:, 1]  
+    y_val_prob = log_reg.predict_proba(X_val)[:, 1]  
+    y_test_prob = log_reg.predict_proba(X_test)[:, 1]  
 
     train_loss = log_loss(y_train, y_train_prob)
     val_loss = log_loss(y_val, y_val_prob)

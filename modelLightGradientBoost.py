@@ -6,7 +6,6 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 import matplotlib.pyplot as plt
 
 def load_data(filepath):
-    """ Load and preprocess dataset """
     data = pd.read_csv(filepath)
     
     x = data.iloc[:, :-1]
@@ -25,7 +24,6 @@ def load_data(filepath):
         columns=encoder.get_feature_names_out(qualitative_data)
     )
 
-    # Concatenate the preprocessed quantitative and qualitative data
     x_preprocessed = pd.concat([quantitative_preprocessed, qualitative_preprocessed], axis=1)
 
     # Map target variable ("Yes" and "No" to 1 and 0)
@@ -33,8 +31,7 @@ def load_data(filepath):
     
     return x_preprocessed, y
 
-def train_model(x_train, y_train, x_val, y_val, x_test, y_test, x_train_full, y_train_full):
-    """ Train the LightGBM model, evaluate performance, and plot metrics """
+def train_model(x_train, y_train, x_val, y_val, x_test, y_test):
     model = lgb.LGBMClassifier(learning_rate=0.09, max_depth=-5, random_state=42)
     model.fit(x_train, y_train, eval_set=[(x_val, y_val), (x_train, y_train)], eval_metric='logloss')
 
@@ -83,16 +80,10 @@ def train_model(x_train, y_train, x_val, y_val, x_test, y_test, x_train_full, y_
 
 def main():
     filepath = "Thyroid_Diff.csv"
-    
-    # Load and preprocess the data
     x_preprocessed, y = load_data(filepath)
-
-    # Split the dataset into 70% training, 20% validation, and 10% testing
     x_train, x_temp, y_train, y_temp = train_test_split(x_preprocessed, y, test_size=0.30, random_state=42)
     x_val, x_test, y_val, y_test = train_test_split(x_temp, y_temp, test_size=0.33, random_state=42)
-
-    # Train the LightGBM model and evaluate it
-    train_model(x_train, y_train, x_val, y_val, x_test, y_test, x_train, y_train)
+    train_model(x_train, y_train, x_val, y_val, x_test, y_test)
 
 if __name__ == "__main__":
     main()

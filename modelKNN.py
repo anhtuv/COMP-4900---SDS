@@ -79,7 +79,6 @@ def main():
     X, y, feature_names = load_data(filepath)
     X_selected, selected_features = select_important_features(X, y, feature_names, k=5)
     knn_model = train_knn_model(X_selected, y)
-    print("KNN Model Trained Successfully")
 
 if __name__ == "__main__":
     main()

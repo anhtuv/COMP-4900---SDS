@@ -32,7 +32,6 @@ def load_data(filepath):
   return X_scaled, y
 
 def train_svm_model(X, y):
-  # Split into training and test sets (70-20-10 split)
   X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.30, random_state=42)
   X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.33, random_state=42)
 
@@ -74,9 +73,6 @@ def train_svm_model(X, y):
   train_loss = hinge_loss(y_train_hinge, train_decision)
   val_loss = hinge_loss(y_val_hinge, val_decision)
   test_loss = hinge_loss(y_test_hinge, test_decision)
-
-
-
 
 
   # Train an SVM with a linear kernel for feature selection
@@ -128,17 +124,6 @@ def train_svm_model(X, y):
   plt.tight_layout()
 
   plt.show()
-
-
-
-
-
-
-
-  # # Apply Chi-square test
-  # chi2_selector = SelectKBest(chi2, k=5)  # Select top 5 features
-  # selected_features = feature_names[chi2_selector.get_support()]
-  # print("Top Features by Chi-Square Test:", selected_features)
 
 
   # Print results

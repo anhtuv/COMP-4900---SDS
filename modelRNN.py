@@ -6,15 +6,25 @@ from sklearn.metrics import accuracy_score, roc_auc_score, f1_score, log_loss, c
 import keras
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import BinaryCrossentropy
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.metrics import f1_score, confusion_matrix, log_loss, roc_auc_score
+from tensorflow import keras
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.losses import BinaryCrossentropy
+import matplotlib.pyplot as plt
 
-def thyroid_cancer_recurrence_model(filepath):
-  # Load data
+def load_data(filepath):
+  """ Load and preprocess the thyroid cancer recurrence dataset """
   df = pd.read_csv(filepath)
   
   # Encode categorical features
   labelencoder = LabelEncoder()
   df['Recurred'] = labelencoder.fit_transform(df['Recurred'])
 
+  # Separate quantitative and qualitative data
   quantitative_data = df.select_dtypes(include=['int64', 'float64']).drop('Recurred', axis=1)
   qualitative_data = df.select_dtypes(include=['object'])
 
@@ -29,11 +39,11 @@ def thyroid_cancer_recurrence_model(filepath):
   # Combine processed data
   X = np.hstack((quantitative_preprocessed, qualitative_preprocessed))
   y = df['Recurred']
+  
+  return X, y
 
-  # Train-validation-test split (70-20-10)
-  X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.30, random_state=42)
-  X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.33, random_state=42)
-
+def train_model(X_train, y_train, X_val, y_val, X_test, y_test):
+  """ Train the model and evaluate it """
   # RNN model
   model = keras.Sequential([
     keras.layers.Dense(64, input_shape=(X_train.shape[1],), activation="relu"),
@@ -86,17 +96,18 @@ def thyroid_cancer_recurrence_model(filepath):
   auc = roc_auc_score(y_test, y_test_proba)
   print("AUC Score:", auc)
 
-  # # Generate predictions and classification report
-  # y_pred = (model.predict(X_test) > 0.5).astype(int)
-  # report = metrics.classification_report(y_test, y_pred, output_dict=True)
-
-  # # Display results
-  # print(f"Test Loss: {loss:.4f}, Test Accuracy: {accuracy:.4f}")
-  # print(metrics.classification_report(y_test, y_pred))
+  # Plot feature importance and metrics
+  # lgb.plot_importance(model)
+  # plt.savefig('importance.png')
+  # lgb.plot_metric(model)
+  # plt.savefig('metric.png')
 
 def main():
   filepath = "Thyroid_Diff.csv"
-  thyroid_cancer_recurrence_model(filepath)
+  X, y = load_data(filepath)
+  X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.30, random_state=42)
+  X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.33, random_state=42)
+  train_model(X_train, y_train, X_val, y_val, X_test, y_test)
 
 if __name__ == "__main__":
   main()
