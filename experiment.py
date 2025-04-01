@@ -1,31 +1,32 @@
 from feature_selection import mutual_information, lasso_reg, rec_feat_elim, chi_square
 from sklearn.model_selection import train_test_split
 import modelLogisticReg as logreg
-import modelSVM as svm
-import modelKNN as knn
-import modelRNN as rnn
-import modelRandomForest as random_forest
+# import modelSVM as svm
+# import modelKNN as knn
+# import modelRNN as rnn
+# import modelRandomForest as random_forest
 import modelLightGradientBoost as lg_boost
-import modelXgboost as xg_boost
+# import modelXgboost as xg_boost
 # import matplotlib as plt
 import pandas as pd
 # import numpy as np
+import json
 
 feature_selection_methods = {
         "Mutual Information": mutual_information,
-        "Lasso": lasso_reg,
-        "Recursive Feature Elimination": rec_feat_elim,
-        "Chi-Square": chi_square
+        # "Lasso": lasso_reg,
+        # "Recursive Feature Elimination": rec_feat_elim,
+        # "Chi-Square": chi_square
     }
     
 classification_models = {
-        "Light Gradient Boosting": lg_boost,
+        # "Light Gradient Boosting": lg_boost,
         "Logistic Regression": logreg,
-        "K-Nearest Neighbour": knn,
-        "Random Forest": random_forest,
-        "RNN": rnn,
-        "SVM": svm,
-        "XGBoost": xg_boost
+        # "K-Nearest Neighbour": knn,
+        # "Random Forest": random_forest,
+        # "RNN": rnn,
+        # "SVM": svm,
+        # "XGBoost": xg_boost
     }
 
 
@@ -47,12 +48,15 @@ def run_experiments(model, data):
     for feat_sel in feature_selection_methods:
         results[feat_sel] = []
         features = feature_selection_methods[feat_sel](x_train, y_train)
-        for x in range(0, len(features)):
+        for x in range(1, len(features)+1):
             selected_features = features[:x]
             x_train_selected = x_train[selected_features]
             x_val_selected = x_val[selected_features]
             x_test_selected = x_test[selected_features]
+            
             results[feat_sel].append(model.train_model(x_train_selected, y_train, x_val_selected, y_val, x_test_selected, y_test))
+        with open(f"{feat_sel}.json", 'w') as fp:
+            json.dump(results[feat_sel], fp)
     return results
     
 #graph for a specific model
@@ -64,4 +68,5 @@ def run_experiments(model, data):
 data = load_data("Thyroid_Diff.csv")
 
 for model in classification_models:
-    run_experiments(classification_models[model], data)
+    result = run_experiments(classification_models[model], data)
+    print(result)
