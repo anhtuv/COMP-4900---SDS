@@ -80,8 +80,8 @@ def train_model(x_train, y_train, x_val, y_val, x_test, y_test):
 
 def main():
     filepath = "Thyroid_Diff.csv"
-    x_preprocessed, y = load_data(filepath)
-    x_train, x_temp, y_train, y_temp = train_test_split(x_preprocessed, y, test_size=0.30, random_state=42)
+    x, y = load_data(filepath)
+    x_train, x_temp, y_train, y_temp = train_test_split(x, y, test_size=0.30, random_state=42)
     x_val, x_test, y_val, y_test = train_test_split(x_temp, y_temp, test_size=0.33, random_state=42)
     train_model(x_train, y_train, x_val, y_val, x_test, y_test)
 

@@ -17,34 +17,26 @@ from tensorflow.keras.losses import BinaryCrossentropy
 import matplotlib.pyplot as plt
 
 def load_data(filepath):
-  """ Load and preprocess the thyroid cancer recurrence dataset """
   df = pd.read_csv(filepath)
   
-  # Encode categorical features
   labelencoder = LabelEncoder()
   df['Recurred'] = labelencoder.fit_transform(df['Recurred'])
 
-  # Separate quantitative and qualitative data
   quantitative_data = df.select_dtypes(include=['int64', 'float64']).drop('Recurred', axis=1)
   qualitative_data = df.select_dtypes(include=['object'])
 
-  # Scale numerical features
   scaler = StandardScaler()
   quantitative_preprocessed = scaler.fit_transform(quantitative_data)
 
-  # One-hot encode categorical features
   encoder = OneHotEncoder(sparse_output=False)
   qualitative_preprocessed = encoder.fit_transform(qualitative_data)
 
-  # Combine processed data
   X = np.hstack((quantitative_preprocessed, qualitative_preprocessed))
   y = df['Recurred']
   
   return X, y
 
 def train_model(X_train, y_train, X_val, y_val, X_test, y_test):
-  """ Train the model and evaluate it """
-  # RNN model
   model = keras.Sequential([
     keras.layers.Dense(64, input_shape=(X_train.shape[1],), activation="relu"),
     keras.layers.Dropout(0.4),
