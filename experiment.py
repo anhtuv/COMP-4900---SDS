@@ -7,7 +7,7 @@ import modelLogisticReg as logreg
 # import modelRandomForest as random_forest
 import modelLightGradientBoost as lg_boost
 # import modelXgboost as xg_boost
-# import matplotlib as plt
+import matplotlib as plt
 import pandas as pd
 # import numpy as np
 import json
@@ -64,9 +64,28 @@ def run_experiments(model, data):
     #y == performance measure
     #colours == feature selection model
     
+
+def plot_data(data): 
+
+    results = data["results"]
+
+    # Plot results
+    plt.figure(figsize=(10, 6))
+    for method, scores in results.items():
+        plt.plot(range(1, len(scores) + 1), scores, label=method)
+
+    plt.xlabel("Top X features")
+    plt.ylabel("Accuracy")
+    plt.title("Feature Selection Methods")
+    plt.legend()
+    plt.grid()
+    plt.show()
     
 data = load_data("Thyroid_Diff.csv")
 
 for model in classification_models:
     result = run_experiments(classification_models[model], data)
+    # plot_data(data)
     print(result)
+
+
